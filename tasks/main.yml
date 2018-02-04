@@ -1,2 +1,48 @@
 ---
-# tasks file for CA
+- name: Create consul TLS directories
+  file:
+    path: "{{ CA_DIR }}"
+    state: directory
+    mode: 0655
+  register: res
+
+- debug:
+    msg: "{{ res.changed }}"
+
+- name: Create CA and client certificate and key if directory /etc/tls is absent
+  block:
+
+    - name: Set start CA serial
+      copy:
+        content: "{{ FIRST_CA_SERIAL }}"
+        dest: "{{ CA_DIR }}/{{ CERT_SERIAL_FILENAME }}"
+
+    - name: Create certindex file
+      copy:
+        content: ""
+        dest: "{{ CA_DIR }}/{{ CERT_DATABASE_FILENAME }}"
+
+    - name: Generate CA certificate and key
+      shell: openssl req -x509 -newkey {{ CA_KEYTYPE }} -keyout {{ CA_DIR }}/{{ CA_PRIVKEY_NAME }} \
+           -days {{ CA_EXPIRE }} -nodes -out {{ CA_DIR }}/{{ CA_CERT_NAME }} -subj \
+           /C="{{ CA_COUNTRY }}"/ST="{{ CA_STATE }}"/L="{{ CA_LOCALITY }}"/O="{{ CA_ORG_NAME }}"\
+           /OU="{{ CA_ORG_UNIT_NAME }}"/CN="{{ CA_COMMON_NAME }}"/emailAddress="{{ CA_EMAIL }}"
+
+    - name: Create a certificate authority configuration file
+      template:
+        src: ca.j2
+        dest: "{{ CA_DIR }}/{{ CA_NAME }}.conf"
+
+    - name: Generate client CSR and wildcard key
+      shell: openssl req -newkey {{ CLIENT_KEYTYPE }} -nodes -out {{ CA_DIR }}/{{ CLIENT_CSR_FILENAME }}
+             -keyout {{ CA_DIR }}/{{ CLIENT_KEY_FILENAME }} -subj /C="{{ CLIENT_COUNTRY }}"/ST="{{ CLIENT_STATE }}"\
+             /L="{{ CLIENT_LOCALITY }}"/O="{{ CLIENT_ORG_NAME }}"/OU="{{ CLIENT_ORG_UNIT_NAME }}"/CN="{{ CLIENT_COMMON_NAME }}"\
+             /emailAddress="{{ CLIENT_EMAIL }}"
+
+    - name: Generate client certificate and key
+      shell: cd {{ CA_DIR }} && openssl ca -batch -config {{ CA_DIR }}/{{ CA_NAME }}.conf -notext -in \
+             {{ CA_DIR }}/{{ CLIENT_CSR_FILENAME }} -out {{ CA_DIR }}/{{ CLIENT_CERT_FILENAME }} && cp \
+             {{ CA_DIR }}/{{ CA_CERT_NAME }} {{ CA_DIR }}/{{ CLIENT_KEY_FILENAME }} \
+             {{ CA_DIR }}/{{ CLIENT_CERT_FILENAME}} {{ TLS_DIR }}/
+
+  when: res.changed != False

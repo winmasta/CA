@@ -1,2 +1,29 @@
 ---
-# defaults file for CA
+TLS_DIR: /etc/tls
+CA_DIR: "{{ TLS_DIR }}/CA"
+FIRST_CA_SERIAL: 000a
+CERT_SERIAL_FILENAME: serial
+CERT_DATABASE_FILENAME: certindex
+CA_KEYTYPE: rsa:2048
+CA_PRIVKEY_NAME: ca_privkey.key
+CA_EXPIRE: 3650
+CA_CERT_NAME: ca.cert
+CA_COUNTRY: US
+CA_STATE: CA
+CA_LOCALITY: Some City
+CA_ORG_NAME: Some Company
+CA_ORG_UNIT_NAME: Some dept
+CA_COMMON_NAME: Consul ENV Server
+CA_EMAIL: dept@company.com
+CA_NAME: af_ca
+CLIENT_KEYTYPE: rsa:1024
+CLIENT_CSR_FILENAME: client.csr
+CLIENT_KEY_FILENAME: client.key
+CLIENT_COUNTRY: US
+CLIENT_STATE: CA
+CLIENT_LOCALITY: Some City
+CLIENT_ORG_NAME: Some Company
+CLIENT_ORG_UNIT_NAME: Some dept
+CLIENT_COMMON_NAME: "*.company.com"
+CLIENT_EMAIL: dept@company.com
+CLIENT_CERT_FILENAME: client.cert
