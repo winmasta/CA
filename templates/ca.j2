@@ -1,0 +1,29 @@
+[ ca ]
+default_ca = {{ CA_NAME }}
+
+[ {{ CA_NAME }} ]
+unique_subject = no
+new_certs_dir = .
+certificate = {{ CA_CERT_NAME }}
+database = {{ CERT_DATABASE_FILENAME }}
+private_key = {{ CA_PRIVKEY_NAME }}
+serial = {{ CERT_SERIAL_FILENAME }}
+default_days = {{ CA_EXPIRE }}
+default_md = sha1
+policy = myca_policy
+x509_extensions = myca_extensions
+
+[ myca_policy ]
+commonName = supplied
+stateOrProvinceName = supplied
+countryName = supplied
+emailAddress = supplied
+organizationName = supplied
+organizationalUnitName = supplied
+
+[ myca_extensions ]
+basicConstraints = CA:false
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always
+keyUsage = digitalSignature,keyEncipherment
+extendedKeyUsage = serverAuth,clientAuth
