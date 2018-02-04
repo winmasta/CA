@@ -6,9 +6,6 @@
     mode: 0655
   register: res
 
-- debug:
-    msg: "{{ res.changed }}"
-
 - name: Create CA and client certificate and key if directory /etc/tls is absent
   block:
 
